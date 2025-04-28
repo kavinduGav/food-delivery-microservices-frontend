@@ -9,6 +9,9 @@ import RestaurantDashboard from './pages/restaurant/RestaurantDashboard';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import SubmitFeedback from './microservices/feedback/SubmitFeedback';
 import FeedbackProfile from './microservices/feedback/FeedbackProfile';
+import AddDiliverRole from './microservices/DiliverRole/CreateDiliverRole';
+import DiliveryDetailsProfile from './microservices/DiliverRole/DiliveryDetailsProfile';
+import CompleteDiliveryDetails from './microservices/DiliverRole/CompleteDiliveryDetails';
 
 function App() {
   return (
@@ -29,6 +32,9 @@ function App() {
 
         <Route path="/SubmitFeedback" element={<SubmitFeedback />} />
         <Route path="/FeedbackProfile" element={<FeedbackProfile />} />
+        <Route path="/AddDiliverRole" element={<AddDiliverRole />} />
+        <Route path="/DiliveryDetailsProfile" element={<DiliveryDetailsProfile />} />
+        <Route path="/update-task/:id" element={<CompleteDiliveryDetails />} />
 
       </Routes>
     </Router>

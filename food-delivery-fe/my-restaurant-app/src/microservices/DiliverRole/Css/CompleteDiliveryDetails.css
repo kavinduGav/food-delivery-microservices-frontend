@@ -1,0 +1,21 @@
+.delivery-header {
+    font-size: 1.5rem; /* Larger font size */
+    font-weight: bold; /* Bold text for emphasis */
+    color: #28a745; /* Green color */
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2); /* Subtle shadow effect */
+    background: linear-gradient(90deg, rgba(40, 167, 69, 1) 0%, rgba(0, 204, 255, 1) 100%); /* Gradient background */
+    -webkit-background-clip: text; /* Apply gradient to text */
+    color: transparent; /* Make the text itself transparent */
+    padding: 0.3em; /* Add padding for spacing */
+    display: inline-block; /* Inline-block for text element */
+    border-radius: 5px; /* Rounded corners */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Shadow around the text */
+    transition: all 0.3s ease; /* Smooth transition for hover effect */
+  }
+  
+  .delivery-header:hover {
+    transform: scale(1.1); /* Zoom effect on hover */
+    color: #050101; /* Change text color on hover */
+    text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4); /* Darker shadow effect on hover */
+  }
+  
