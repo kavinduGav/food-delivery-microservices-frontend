@@ -7,6 +7,8 @@ import Checkout from './pages/customer/Checkout';
 import OrderConfirmation from './pages/customer/OrderConfirmation';
 import RestaurantDashboard from './pages/restaurant/RestaurantDashboard';
 import AdminDashboard from './pages/admin/AdminDashboard';
+import SubmitFeedback from './microservices/feedback/SubmitFeedback';
+import FeedbackProfile from './microservices/feedback/FeedbackProfile';
 
 function App() {
   return (
@@ -21,6 +23,13 @@ function App() {
         <Route path="/restaurant-dashboard" element={<RestaurantDashboard />} />
         <Route path="/admin-dashboard" element={<AdminDashboard />} />
         <Route path="/" element={<Restaurants />} />
+
+
+
+
+        <Route path="/SubmitFeedback" element={<SubmitFeedback />} />
+        <Route path="/FeedbackProfile" element={<FeedbackProfile />} />
+
       </Routes>
     </Router>
   );
