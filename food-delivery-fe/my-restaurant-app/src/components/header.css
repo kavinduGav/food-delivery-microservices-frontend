@@ -1,0 +1,56 @@
+/* header.css */
+
+/* Top nav container */
+.nav-top {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: #dde1e6;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+}
+
+/* Inner content wrapper */
+.nav-content {
+  height: 70px;
+}
+
+/* Logo and site name */
+.logo {
+  height: 40px;
+  width: auto;
+}
+
+.site-name {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #121212;
+}
+
+/* Nav links */
+.nav-links {
+  list-style: none;
+  gap: 1.5rem;
+}
+
+.nav-links li a {
+  text-decoration: none;
+  color: #121212;
+  font-weight: 500;
+  transition: color 0.2s, transform 0.2s;
+}
+
+.nav-links li a:hover {
+  color: #007bff;
+  transform: scale(1.05);
+}
+
+/* Profile image */
+.profile-img {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #fff;
+}
