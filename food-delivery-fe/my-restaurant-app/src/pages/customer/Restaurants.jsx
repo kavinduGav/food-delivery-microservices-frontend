@@ -18,20 +18,12 @@ const Restaurants = () => {
     const fetchRestaurants = async () => {
       try {
         // This would be your actual API call
-        const response = await fetch('/api/restaurants');
+        const response = await fetch('http://localhost:5001/api/restaurants/all');
         const data = await response.json();
         
         setRestaurants(data);
         setFilteredRestaurants(data);
-        
-        // Extract unique cuisines for filter options
-        const cuisineSet = new Set();
-        data.forEach(restaurant => {
-          restaurant.cuisines.forEach(cuisine => {
-            cuisineSet.add(cuisine);
-          });
-        });
-        setCuisineOptions(Array.from(cuisineSet));
+        console.log(data);
       } catch (error) {
         console.error('Failed to fetch restaurants:', error);
       } finally {
@@ -43,21 +35,14 @@ const Restaurants = () => {
   }, []);
 
   useEffect(() => {
-    // Filter restaurants based on search text and cuisine
+    // Filter restaurants based on search text only
     const filtered = restaurants.filter(restaurant => {
-      const matchesSearch = 
-        restaurant.name.toLowerCase().includes(searchText.toLowerCase()) ||
-        restaurant.description.toLowerCase().includes(searchText.toLowerCase());
-      
-      const matchesCuisine = 
-        cuisine === 'all' || 
-        restaurant.cuisines.includes(cuisine);
-      
-      return matchesSearch && matchesCuisine;
+      return restaurant.name.toLowerCase().includes(searchText.toLowerCase()) ||
+             restaurant.description.toLowerCase().includes(searchText.toLowerCase());
     });
     
     setFilteredRestaurants(filtered);
-  }, [searchText, cuisine, restaurants]);
+  }, [searchText, restaurants]);
 
   return (
     <div>
@@ -102,7 +87,7 @@ const Restaurants = () => {
                   cover={
                     <img 
                       alt={restaurant.name} 
-                      src={restaurant.imageUrl || "/api/placeholder/400/250"} 
+                      src={restaurant.image || "/api/placeholder/400/250"} 
                       className="h-48 object-cover"
                     />
                   }
@@ -110,7 +95,7 @@ const Restaurants = () => {
                 >
                   <Meta 
                     title={restaurant.name} 
-                    description={restaurant.description.substring(0, 60) + '...'}
+                    description={restaurant.name.substring(0, 60) + '...'}
                   />
                   <div className="mt-2">
                     <Rate disabled defaultValue={restaurant.rating} className="text-sm" />
@@ -118,11 +103,7 @@ const Restaurants = () => {
                       ({restaurant.reviewCount} reviews)
                     </span>
                   </div>
-                  <div className="mt-2">
-                    {restaurant.cuisines.map(cuisine => (
-                      <Tag key={cuisine} className="mb-1">{cuisine}</Tag>
-                    ))}
-                  </div>
+                  
                 </Card>
               </Link>
             </Col>
