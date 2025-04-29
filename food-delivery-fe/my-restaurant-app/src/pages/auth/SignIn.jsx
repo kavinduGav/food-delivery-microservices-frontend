@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { signOut } from '../../utils/auth';
 
 const SignIn = () => {
   const navigate = useNavigate();
@@ -151,6 +152,16 @@ const SignIn = () => {
             </div>
           </form>
         </div>
+      </div>
+
+      {/* Sign Out Button */}
+      <div className="mt-4 text-center">
+        <button
+          onClick={signOut}
+          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700"
+        >
+          Sign Out
+        </button>
       </div>
     </div>
   );

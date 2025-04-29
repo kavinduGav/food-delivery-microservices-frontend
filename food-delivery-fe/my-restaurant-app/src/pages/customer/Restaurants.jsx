@@ -1,38 +1,64 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 const Restaurants = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [restaurants, setRestaurants] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  // Mock data - replace with actual API call
-  const restaurants = [
-    {
-      id: 1,
-      name: 'Pizza Palace',
-      image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591',
-      rating: 4.5,
-      deliveryTime: '30-40 min',
-      categories: ['Italian', 'Pizza'],
-    },
-    {
-      id: 2,
-      name: 'Burger King',
-      image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd',
-      rating: 4.2,
-      deliveryTime: '20-30 min',
-      categories: ['Fast Food', 'Burgers'],
-    },
-    // Add more restaurants as needed
-  ];
+  useEffect(() => {
+    const fetchRestaurants = async () => {
+      try {
+        const response = await fetch('http://localhost:5001/api/restaurants/all');
+        if (!response.ok) {
+          throw new Error('Failed to fetch restaurants');
+        }
+        const data = await response.json();
+        // Ensure we have valid MongoDB ObjectIds
+        const validRestaurants = data.filter(restaurant => {
+          if (!restaurant._id || typeof restaurant._id !== 'string' || restaurant._id.length !== 24) {
+            console.warn(`Invalid restaurant ID: ${restaurant._id}`);
+            return false;
+          }
+          return true;
+        });
+        setRestaurants(validRestaurants);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const categories = ['all', 'Italian', 'Pizza', 'Fast Food', 'Burgers', 'Chinese', 'Indian'];
+    fetchRestaurants();
+  }, []);
+
+  // Extract unique categories from restaurants
+  const categories = ['all', ...new Set(restaurants.flatMap(restaurant => restaurant.categories))];
 
   const filteredRestaurants = restaurants.filter(restaurant => {
     const matchesSearch = restaurant.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || restaurant.categories.includes(selectedCategory);
     return matchesSearch && matchesCategory;
   });
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-xl text-gray-600">Loading restaurants...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-xl text-red-600">Error: {error}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -63,7 +89,7 @@ const Restaurants = () => {
             >
               {categories.map((category) => (
                 <option key={category} value={category}>
-                  {category.charAt(0).toUpperCase() + category.slice(1)}
+                  {category}
                 </option>
               ))}
             </select>
@@ -74,8 +100,8 @@ const Restaurants = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredRestaurants.map((restaurant) => (
             <Link
-              key={restaurant.id}
-              to={`/restaurant/${restaurant.id}`}
+              key={restaurant._id}
+              to={`/restaurant/${restaurant._id}`}
               className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
             >
               <div className="relative h-48">
@@ -93,7 +119,7 @@ const Restaurants = () => {
                 <div className="mt-2 flex items-center text-sm text-gray-500">
                   <span>{restaurant.deliveryTime}</span>
                   <span className="mx-2">•</span>
-                  <span>{restaurant.categories.join(', ')}</span>
+                  <span>{restaurant.category}</span>
                 </div>
               </div>
             </Link>
