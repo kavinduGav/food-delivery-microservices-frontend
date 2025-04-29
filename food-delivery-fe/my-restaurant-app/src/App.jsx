@@ -7,8 +7,12 @@ import Checkout from './pages/customer/Checkout';
 import OrderConfirmation from './pages/customer/OrderConfirmation';
 import RestaurantDashboard from './pages/restaurant/RestaurantDashboard';
 import AdminDashboard from './pages/admin/AdminDashboard';
+import RestaurantDetailsAdmin from './pages/admin/RestauratnDetailsAdmin';
+import MenuManagement from './pages/restaurant/MenuManagement';
+import { Navigate } from 'react-router-dom';
 
 function App() {
+  const isAuthenticated = localStorage.getItem("token") !== null;
   return (
     <Router>
       <Routes>
@@ -21,6 +25,13 @@ function App() {
         <Route path="/restaurant-dashboard" element={<RestaurantDashboard />} />
         <Route path="/admin-dashboard" element={<AdminDashboard />} />
         <Route path="/" element={<Restaurants />} />
+        <Route
+          path="/restaurant/admin/:id"
+          element={
+            isAuthenticated ? <RestaurantDetailsAdmin /> : <Navigate to="/" />
+          }
+        />
+        <Route path="/menu-management" element={<MenuManagement />} />
       </Routes>
     </Router>
   );

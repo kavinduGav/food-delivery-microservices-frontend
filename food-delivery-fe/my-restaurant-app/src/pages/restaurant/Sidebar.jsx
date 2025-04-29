@@ -15,11 +15,11 @@ const Sidebar = () => {
   const location = useLocation();
 
   const menuItems = [
-    { name: "Dashboard", icon: HomeIcon, path: "/dashboard" },
+    { name: "Dashboard", icon: HomeIcon, path: "/restaurant-dashboard" },
     {
-      name: "Restaurants",
+      name: "Restaurant Management",
       icon: BuildingStorefrontIcon,
-      path: "/admin-dashboard",
+      path: "/menu-management",
     },
     { name: "Orders", icon: ShoppingBagIcon, path: "/orders" },
     { name: "Customers", icon: UserGroupIcon, path: "/customers" },

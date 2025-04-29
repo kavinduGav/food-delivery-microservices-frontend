@@ -54,7 +54,7 @@ const AdminDashboard = () => {
   };
 
   const handleViewRestaurant = (id) => {
-    navigate(`/restaurant/${id}`);
+    navigate(`/restaurant/admin/${id}`);
   };
 
   const formatDate = (dateString) => {
