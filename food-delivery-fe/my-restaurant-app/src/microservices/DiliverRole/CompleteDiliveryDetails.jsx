@@ -10,6 +10,7 @@ function CompleteDiliveryDetails() {
   const [task, setTask] = useState({
     customerName: "",
     totalAmount: "",
+    email: "",
     createdAt: "",
     paymentMethod: "",
     paymentStatus: "",
@@ -18,7 +19,7 @@ function CompleteDiliveryDetails() {
   useEffect(() => {
     const fetchTaskData = async () => {
       try {
-        const response = await fetch(`/api/diliver/getForupdateDilivery/${id}`);
+        const response = await fetch(`http://localhost:3002/api/diliver/getForupdateDilivery/${id}`);
         const data = await response.json();
         console.log(data);
 
@@ -53,7 +54,7 @@ function CompleteDiliveryDetails() {
     if (result.isConfirmed) {
       try {
         task.is_deliveryStatus = true;
-        const response = await fetch(`/api/diliver/updateDilivery`, {
+        const response = await fetch(`http://localhost:3002/api/diliver/updateDilivery`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -67,13 +68,39 @@ function CompleteDiliveryDetails() {
 
         const data = await response.json();
 
+
+        const emailResponse = await fetch('http://localhost:3002/api/diliver/CompleteDiliverysendEmail', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email: task.email }),
+        });
+    
+        const emailContentType = emailResponse.headers.get('content-type');
+        let emailData = {};
+    
+        if (emailContentType && emailContentType.includes('application/json')) {
+          emailData = await emailResponse.json();
+        } else {
+          const emailText = await emailResponse.text();
+          console.error('Email response is not JSON:', emailText);
+          throw new Error('Invalid email server response');
+        }
+    
+        if (emailResponse.ok && emailData.success) {
+          console.log('Email sent successfully to', formData.email);
+        } else {
+          console.log('Failed to send email', emailData.message);
+        }
+    
         if (data.success) {
           await Swal.fire(
             'Completed!',
             'The delivery has been marked as completed.',
             'success'
           );
-          navigate('/MyDiliveryDetails');
+          navigate('/DiliveryDetailsProfile');
         } else {
           console.error(data.message);
         }
@@ -113,6 +140,8 @@ function CompleteDiliveryDetails() {
           {/* Task Details */}
           <div className="mb-4">
             <p><strong>Customer Name:</strong> {task?.customerName}</p>
+            <br/>
+            <p><strong>Email:</strong> {task?.email }</p>
             <br/>
             <p><strong>Total Amount:</strong> Rs.{task?.totalAmount}.00</p>
             <br/>

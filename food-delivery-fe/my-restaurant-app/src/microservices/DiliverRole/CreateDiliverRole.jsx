@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-//import { app } from '../../firebase';
-// import { useSelector } from 'react-redux';
+// import { app } from '../../firebase';
+import { useSelector } from 'react-redux';
 import deliveryImage from './Image/diliver.png'; // correct path based on your project
-
+import axios from 'axios';
 // import {
 //   getStorage,
 //   uploadBytesResumable,
@@ -29,11 +29,13 @@ export default function AddDiliverRole() {
   const [error, setError] = useState('');
   const fileRef1 = useRef(null);
   const navigate = useNavigate();
- // const { currentUser } = useSelector((state) => state.user);
+  // const { currentUser } = useSelector((state) => state.user);
 
+  // State to store form data
   const [formData, setFormData] = useState({
-   // userId: currentUser?._id || '',
+    // userId: currentUser?._id || '',
     customerName: '',
+    email: "",
     restaurantName: '',
     pickupTime: '',
     deliveryTime: '',
@@ -42,32 +44,50 @@ export default function AddDiliverRole() {
     createdAt: new Date().toISOString().slice(0, 16),
   });
 
+  // State to store the selected order
+  const [selectedOrder, setSelectedOrder] = useState(null);
+
+  // Sample orders list (this would be fetched from the backend)
+  const orders = [
+    {
+      customerName: 'John Doe',
+      email: 'shehansalitha1999@gmail.com',
+      restaurantName: 'Pizza Place',
+      pickupTime: '12:00',
+      deliveryTime: '12:30',
+      deliveryAddress: 'Negambo',
+      totalAmount: '25.00',
+    },
+    {
+      customerName: 'Jane Smith',
+      email: 'shehansalitha1999@gmail.com',
+      restaurantName: 'Burger King',
+      pickupTime: '14:00',
+      deliveryTime: '14:30',
+      deliveryAddress: 'Kandy',
+      totalAmount: '15.00',
+    },
+    // Add more sample orders as needed
+  ];
+
+  // Set form data when an order is clicked
+  const handleOrderClick = (order) => {
+    setSelectedOrder(order);
+    setFormData({
+      customerName: order.customerName,
+      email: order.email,
+      restaurantName: order.restaurantName,
+      pickupTime: order.pickupTime,
+      deliveryTime: order.deliveryTime,
+      deliveryAddress: order.deliveryAddress,
+      totalAmount: order.totalAmount,
+      createdAt: new Date().toISOString().slice(0, 16),
+    });
+  };
+
   useEffect(() => {
     if (image1) handleFileUpload(image1);
   }, [image1]);
-
- // const handleFileUpload = (file) => {
-   // const storage = getStorage(app);
-   // const fileName = `${Date.now()}_${file.name}`;
-   // const storeRef = ref(storage, fileName);
-   // const uploadTask = uploadBytesResumable(storeRef, file);
-
-    // uploadTask.on(
-    //   'state_changed',
-    //   (snap) => {
-    //     const pct = Math.round((snap.bytesTransferred / snap.totalBytes) * 100);
-    //     setImagePercent(pct);
-    //   },
-    //   () => {
-    //     setImageError(true);
-    //     setError('Image upload failed');
-    //   },
-    //   () =>
-    //     getDownloadURL(uploadTask.snapshot.ref).then((url) => {
-    //       setFormData((f) => ({ ...f, profilePicture: url }));
-    //     })
-    // );
- // };
 
   const validateForm = () => {
     const errs = {};
@@ -94,16 +114,65 @@ export default function AddDiliverRole() {
     }
 
     try {
-      const res = await fetch('/api/diliver/addDilivery', {
+      const token = localStorage.getItem('token');
+
+      const res = await fetch('http://localhost:3002/api/diliver/addDilivery', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(formData),
       });
-      if (!res.ok) throw new Error((await res.json()).message || 'Failed to submit');
+
+      const contentType = res.headers.get('content-type');
+
+      if (!res.ok) {
+        if (contentType && contentType.includes('application/json')) {
+          const errorData = await res.json();
+          throw new Error(errorData.message || 'Failed to submit');
+        } else {
+          const text = await res.text(); // get raw HTML or text
+          console.error('Server response is not JSON:', text);
+          throw new Error('Server returned an invalid response (not JSON)');
+        }
+      }
+
+      // ✅ Safe to parse JSON here
+      const resData = await res.json();
+
+      // Send the email after successful delivery creation
+      const emailResponse = await fetch('http://localhost:3002/api/diliver/sendEmail', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: formData.email }),
+      });
+
+      const emailContentType = emailResponse.headers.get('content-type');
+      let emailData = {};
+
+      if (emailContentType && emailContentType.includes('application/json')) {
+        emailData = await emailResponse.json();
+      } else {
+        const emailText = await emailResponse.text();
+        console.error('Email response is not JSON:', emailText);
+        throw new Error('Invalid email server response');
+      }
+
+      if (emailResponse.ok && emailData.success) {
+        console.log('Email sent successfully to', formData.email);
+      } else {
+        console.log('Failed to send email', emailData.message);
+      }
 
       Swal.fire('Success!', 'Delivery details submitted successfully.', 'success');
-      navigate('/MyDiliveryDetails');
+      navigate('/DiliveryDetailsProfile');
+      console.log('Created token:', token);
+
     } catch (err) {
+      console.error(err);
       setError(err.message);
       Swal.fire('Error!', err.message, 'error');
     }
@@ -165,6 +234,16 @@ export default function AddDiliverRole() {
                   </Form.Control.Feedback>
                 </Form.Group>
 
+                <Form.Group className="mb-3">
+                  <Form.Label>Customer Email</Form.Label>
+                  <Form.Control
+                    type="text"
+                    placeholder="Customer Email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  />
+                </Form.Group>
+
                 <Form.Group controlId="restaurantName" className="mb-3">
                   <Form.Label>Restaurant Name</Form.Label>
                   <Form.Control
@@ -224,7 +303,7 @@ export default function AddDiliverRole() {
                 <Form.Group controlId="totalAmount" className="mb-3">
                   <Form.Label>Total Amount</Form.Label>
                   <Form.Control
-                    type="text"
+                    type="number"
                     placeholder="Total amount"
                     value={formData.totalAmount}
                     isInvalid={!!formErrors.totalAmount}
@@ -235,27 +314,44 @@ export default function AddDiliverRole() {
                   </Form.Control.Feedback>
                 </Form.Group>
               </Col>
+
+              <Col md={12}>
+                <Button variant="primary" type="submit" block>
+                  Submit
+                </Button>
+              </Col>
             </Row>
-
-            <Button variant="success" type="submit" className="w-100 mt-4">
-              Confirm Delivery
-            </Button>
-
-            {error && <div className="mt-3 text-danger text-center">{error}</div>}
           </Form>
         </div>
-
-        {/* Right Side - Image */}
+        {/* Right Side - Order List */}
         <div style={{
           flex: 1,
-          background: `url(${deliveryImage}) no-repeat center`,
-          backgroundSize: '80%',
-          backgroundPosition: 'center',
-          backgroundColor: '#f0f8ff',
+          padding: '1.5rem',
+          borderLeft: '2px solid #e0e0e0',
           display: 'flex',
-          alignItems: 'center',
+          flexDirection: 'column',
           justifyContent: 'center',
-        }} />
+          backgroundColor: '#f9f9f9'
+        }}>
+          <h4 className="text-center mb-4" style={{ fontSize: '1.1rem', fontWeight: '600' }}>
+            Orders
+          </h4>
+          <ul style={{ listStyleType: 'none', padding: '0' }}>
+            {orders.map((order, index) => (
+              <li key={index} style={{
+                padding: '1rem',
+                backgroundColor: '#fff',
+                marginBottom: '1rem',
+                boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+                borderRadius: '8px',
+                cursor: 'pointer'
+              }} onClick={() => handleOrderClick(order)}>
+                <h5>{order.customerName}</h5>
+                <p>{order.restaurantName} - {order.totalAmount}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
       </Card>
     </div>
   );

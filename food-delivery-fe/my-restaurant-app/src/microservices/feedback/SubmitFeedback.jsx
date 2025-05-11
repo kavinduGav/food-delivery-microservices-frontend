@@ -70,24 +70,84 @@ export default function SubmitFeedback() {
     return !Object.keys(errs).length;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    if (!validateForm()) return;
-    try {
-      const res = await fetch('/api/feedback/addFeedback', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      });
-      if (!res.ok) throw new Error((await res.json()).message || 'Failed');
-      Swal.fire('Thank you!', 'Your feedback has been submitted.', 'success');
-      navigate('/MyFeedback');
-    } catch (err) {
-      setError(err.message);
-      Swal.fire('Oops!', err.message, 'error');
-    }
-  };
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   setError('');
+  //   if (!validateForm()) return;
+  //   try {
+  //     const res = await fetch('/api/feedback/addFeedback', {
+  //       method: 'POST',
+  //       headers: { 'Content-Type': 'application/json' },
+  //       body: JSON.stringify(formData)
+  //     });
+  //     if (!res.ok) throw new Error((await res.json()).message || 'Failed');
+  //     Swal.fire('Thank you!', 'Your feedback has been submitted.', 'success');
+  //     navigate('/MyFeedback');
+  //   } catch (err) {
+  //     setError(err.message);
+  //     Swal.fire('Oops!', err.message, 'error');
+  //   }
+  // };
+
+
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+      setError('');
+  
+      if (!validateForm()) {
+        Swal.fire('Validation Error', 'Please correct the highlighted fields.', 'warning');
+        return;
+      }
+  
+      try {
+        const token = localStorage.getItem('token'); // ✅ Retrieve JWT from storage
+  
+        const res = await fetch('http://localhost:3001/api/feedback/addFeedback', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}` // ✅ Include token in header
+          },
+          body: JSON.stringify(formData),
+        });
+  console.log("create token",token)
+        if (!res.ok) {
+          const errorData = await res.json();
+          throw new Error(errorData.message || 'Failed to submit');
+        }
+
+        const emailResponse = await fetch('http://localhost:3001/api/feedback/FeedbacksendMail', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email: formData.u_email }),
+        });
+    
+        const emailContentType = emailResponse.headers.get('content-type');
+        let emailData = {};
+    
+        if (emailContentType && emailContentType.includes('application/json')) {
+          emailData = await emailResponse.json();
+        } else {
+          const emailText = await emailResponse.text();
+          console.error('Email response is not JSON:', emailText);
+          throw new Error('Invalid email server response');
+        }
+    
+        if (emailResponse.ok && emailData.success) {
+          console.log('Email sent successfully to', formData.u_email);
+        } else {
+          console.log('Failed to send email', emailData.message);
+        }
+  
+        Swal.fire('Success!', 'Delivery details submitted successfully.', 'success');
+        navigate('/FeedbackProfile');
+      } catch (err) {
+        setError(err.message);
+        Swal.fire('Error!', err.message, 'error');
+      }
+    };
 
   return (
     <Container

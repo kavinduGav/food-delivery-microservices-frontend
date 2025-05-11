@@ -1,15 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
+
 import { useReactToPrint } from 'react-to-print';
 import 'bootstrap/dist/css/bootstrap.min.css'; // Bootstrap Import
 import './Css/DiliveryDetailsProfile.css'; // Import your custom CSS file
+import { Link, useNavigate } from 'react-router-dom';
 
-export default function DiliveryDetailsProfile() {
+export default function UserViewDiliveryDetailsProfile() {
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [orders, setOrders] = useState([]);
   const [orderIdToDelete, setOrderIdToDelete] = useState('');
   const componentPDF = useRef();
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchOrders();
@@ -23,7 +25,7 @@ export default function DiliveryDetailsProfile() {
         return;
       }
 
-      const response = await fetch(`http://localhost:3002/api/diliver/getDilivery`, {
+      const response = await fetch(`http://localhost:3002/api/diliver/allDiliveries`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -126,19 +128,26 @@ export default function DiliveryDetailsProfile() {
 
                     <td>
                       <div className="d-flex flex-column align-items-center">
-                        <Link
+                        {/* <Link
                           to={`/update-task/${order._id}`}
                           className="btn btn-outline-primary btn-sm mb-2"
                           onClick={() => handleCompleteTask(order._id)}
                         >
                           Accept
-                        </Link>
+                        </Link> */}
 
                         <button
                           className="btn btn-outline-success btn-sm mb-2"
                           onClick={() => handleViewLocation(order.deliveryAddress)}
                         >
                           View Location
+                        </button>
+
+                        <button
+                          className="btn btn-outline-success btn-sm mb-2"
+                          onClick={() => navigate('/SubmitFeedback')}
+                        >
+                          Give Feedback
                         </button>
 
                         {order.is_deliveryStatus ? (

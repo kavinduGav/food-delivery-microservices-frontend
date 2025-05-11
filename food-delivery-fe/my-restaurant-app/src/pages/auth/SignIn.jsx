@@ -16,7 +16,7 @@ const SignIn = () => {
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/login', {
+      const response = await fetch('http://localhost:3000/api/auth/login', { //!changed port===============
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -33,17 +33,19 @@ const SignIn = () => {
       // Store the token in localStorage
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
+      console.log(data.user.role);
+       console.log(data.token);
 
       // Redirect to restaurants page
-      switch (data.role) {
+      switch (data.user.role) {
         case 'restaurant_admin':
           navigate('/restaurant-dashboard');
           break;
         case 'customer':
-          navigate('/restaurants');
+          navigate('/UserViewDiliveryDetailsProfile');
           break;
-        case 'global_admin':
-          navigate('/admin-dashboard');
+        case 'delivery_personnel':
+          navigate('/AddDiliverRole');
           break;
         default:
           navigate('/restaurants');
@@ -156,4 +158,4 @@ const SignIn = () => {
   );
 };
 
-export default SignIn; 
+export default SignIn;

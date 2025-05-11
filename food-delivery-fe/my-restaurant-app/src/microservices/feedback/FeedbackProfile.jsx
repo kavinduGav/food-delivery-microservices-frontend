@@ -8,7 +8,7 @@ import { useReactToPrint } from 'react-to-print';
 
 export default function FeedbackProfile() {
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
-  const [loading, setLoading] = useState(true);
+ // const [loading, setLoading] = useState(true);
   //const { currentUser } = useSelector((state) => state.user);
   const [feedbacks, setFeedbacks] = useState([]);
   const [orderIdToDelete, setOrderIdToDelete] = useState('');
@@ -20,22 +20,61 @@ export default function FeedbackProfile() {
     fetchFeedbacks();
   }, []);
 
+  // const fetchFeedbacks = async () => {
+  //   try {
+  //   //  const res = await fetch(`/api/feedback/getFeedback/${currentUser._id}`);
+  //     const res = await fetch(`/api/feedback/getFeedback`);
+  //     if (!res.ok) throw new Error('Failed to fetch');
+  //     const data = await res.json();
+  //     setFeedbacks(data);
+  //     data.forEach(fb => {
+  //       if (fb.profilePicture) fetchImage(fb.profilePicture, 'avatar', fb._id);
+  //     });
+  //   } catch (err) {
+  //     console.error(err);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+
   const fetchFeedbacks = async () => {
     try {
-    //  const res = await fetch(`/api/feedback/getFeedback/${currentUser._id}`);
-      const res = await fetch(`/api/feedback/getFeedback`);
-      if (!res.ok) throw new Error('Failed to fetch');
-      const data = await res.json();
-      setFeedbacks(data);
-      data.forEach(fb => {
-        if (fb.profilePicture) fetchImage(fb.profilePicture, 'avatar', fb._id);
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.error('No auth token found in localStorage');
+        return;
+      }
+  
+      const response = await fetch(`http://localhost:3001/api/feedback/getFeedback`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
       });
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
+      
+  
+      console.log("get token", token);
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Error response:', errorData);
+        throw new Error(`Failed to fetch orders: ${errorData.message || response.statusText}`);
+      }
+  
+      const data = await response.json();
+  
+      if (!Array.isArray(data)) {
+        throw new Error('Fetched data is not an array. Check backend response.');
+      }
+  
+      setFeedbacks(data);
+    } catch (error) {
+      console.error('Error fetching orders:', error.message);
     }
   };
+  
 
   // const fetchImage = async (path, field, id) => {
   //   try {
@@ -48,7 +87,7 @@ export default function FeedbackProfile() {
 
   const handleDelete = async () => {
     try {
-      const res = await fetch(`/api/feedback/deleteFeedback/${orderIdToDelete}`, { method: 'DELETE' });
+      const res = await fetch(`http://localhost:3001/api/feedback/deleteFeedback/${orderIdToDelete}`, { method: 'DELETE' });
       if (res.ok) setFeedbacks(prev => prev.filter(fb => fb._id !== orderIdToDelete));
     } catch (err) {
       console.error(err);
@@ -85,11 +124,11 @@ export default function FeedbackProfile() {
       </Row>
 
       <div ref={componentPDF}>
-        {loading ? (
-          <div className="text-center py-5">
+      
+          {/* <div className="text-center py-5">
             <Spinner animation="border" />
-          </div>
-        ) : (
+          </div> */}
+         
           <Row xs={1} md={1} lg={1} className="g-4">
             {filtered.length ? filtered.map(fb => (
               <Col key={fb._id}>
@@ -123,7 +162,7 @@ export default function FeedbackProfile() {
               </Col>
             )}
           </Row>
-        )}
+        
       </div>
 
       <Modal show={showModal} onHide={() => setShowModal(false)} centered>

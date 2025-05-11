@@ -12,6 +12,8 @@ import FeedbackProfile from './microservices/feedback/FeedbackProfile';
 import AddDiliverRole from './microservices/DiliverRole/CreateDiliverRole';
 import DiliveryDetailsProfile from './microservices/DiliverRole/DiliveryDetailsProfile';
 import CompleteDiliveryDetails from './microservices/DiliverRole/CompleteDiliveryDetails';
+import Header from './microservices/header/header';
+import UserViewDiliveryDetailsProfile from './microservices/DiliverRole/userViewDiliveryDetailsProfile';
 
 function App() {
   return (
@@ -32,9 +34,11 @@ function App() {
 
         <Route path="/SubmitFeedback" element={<SubmitFeedback />} />
         <Route path="/FeedbackProfile" element={<FeedbackProfile />} />
-        <Route path="/AddDiliverRole" element={<AddDiliverRole />} />
-        <Route path="/DiliveryDetailsProfile" element={<DiliveryDetailsProfile />} />
+        <Route path="/AddDiliverRole" element={<div><Header /><AddDiliverRole /></div>} />
+        <Route path="/DiliveryDetailsProfile" element={<div><Header /><DiliveryDetailsProfile /></div>} />
+        <Route path="/UserViewDiliveryDetailsProfile" element={<UserViewDiliveryDetailsProfile />} />
         <Route path="/update-task/:id" element={<CompleteDiliveryDetails />} />
+        <Route path="/Header" element={<Header />} />
 
       </Routes>
     </Router>
